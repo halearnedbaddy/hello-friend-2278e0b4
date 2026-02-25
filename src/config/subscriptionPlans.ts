@@ -108,3 +108,31 @@ export function getNextPlan(currentPlanId: string): SubscriptionPlan | undefined
 export function getAnnualSavings(plan: SubscriptionPlan): number {
   return (plan.monthlyPrice * 12) - plan.annualPrice;
 }
+
+/** Store sidebar tier: free < pro < business < enterprise */
+export type StorePlanTier = 'free' | 'pro' | 'business' | 'enterprise';
+
+/** Maps subscription plan to store tier level. */
+const tierLevel: Record<StorePlanTier, number> = {
+  free: 0,
+  pro: 1,
+  business: 2,
+  enterprise: 3,
+};
+
+/** User plan maps to store tier: free->free, growth->pro, pro->enterprise */
+const userPlanToTier: Record<string, StorePlanTier> = {
+  free: 'free',
+  growth: 'pro',
+  pro: 'enterprise',
+};
+
+/** Returns true if user's plan can access a feature requiring the given store tier. */
+export function canAccessStoreFeature(
+  requiredTier: StorePlanTier | undefined,
+  userPlanId: string
+): boolean {
+  if (!requiredTier || requiredTier === 'free') return true;
+  const userTier = userPlanToTier[userPlanId] || 'free';
+  return tierLevel[userTier] >= tierLevel[requiredTier];
+}

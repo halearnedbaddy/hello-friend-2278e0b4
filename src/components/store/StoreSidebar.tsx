@@ -6,6 +6,7 @@ import {
   Users, Megaphone, DollarSign, MessageCircle, Star, HelpCircle, 
   ChevronDown, ChevronRight, Lock, Box
 } from 'lucide-react';
+import { canAccessStoreFeature, type StorePlanTier } from '@/config/subscriptionPlans';
 
 export type StoreTab = 
   | 'dashboard'
@@ -21,13 +22,11 @@ export type StoreTab =
   | 'store-settings' | 'store-settings-general' | 'store-settings-domain' | 'store-settings-theme' | 'store-settings-seo' | 'store-settings-payment' | 'store-settings-shipping' | 'store-settings-tax' | 'store-settings-integrations' | 'store-settings-legal' | 'store-settings-webhooks' | 'store-settings-languages' | 'store-settings-invoices'
   | 'support' | 'support-help' | 'support-tickets' | 'support-account-manager';
 
-type PlanTier = 'free' | 'pro' | 'business' | 'enterprise';
-
 interface NavItem {
   id: StoreTab;
   label: string;
   icon?: React.ComponentType<any>;
-  plan?: PlanTier;
+  plan?: StorePlanTier;
   children?: NavItem[];
 }
 
@@ -35,9 +34,11 @@ interface StoreSidebarProps {
   activeTab: StoreTab;
   onTabChange: (tab: StoreTab) => void;
   storeName?: string;
+  currentPlanId?: string;
+  onUpgrade?: () => void;
 }
 
-const planBadge: Record<PlanTier, { label: string; color: string }> = {
+const planBadge: Record<StorePlanTier, { label: string; color: string }> = {
   free: { label: '', color: '' },
   pro: { label: 'Pro+', color: 'bg-amber-500/20 text-amber-400' },
   business: { label: 'Biz+', color: 'bg-blue-500/20 text-blue-400' },
@@ -136,7 +137,7 @@ const navItems: NavItem[] = [
   },
 ];
 
-export function StoreSidebar({ activeTab, onTabChange, storeName }: StoreSidebarProps) {
+export function StoreSidebar({ activeTab, onTabChange, storeName, currentPlanId = 'free', onUpgrade }: StoreSidebarProps) {
   const [expandedGroups, setExpandedGroups] = useState<Set<string>>(() => {
     const initial = new Set<string>();
     navItems.forEach(item => {
@@ -159,15 +160,36 @@ export function StoreSidebar({ activeTab, onTabChange, storeName }: StoreSidebar
   const isChildActive = (item: NavItem) =>
     item.children?.some(c => c.id === activeTab) ?? false;
 
-  const renderPlanBadge = (plan?: PlanTier) => {
+  const hasAccess = (plan?: StorePlanTier) => canAccessStoreFeature(plan, currentPlanId);
+  const renderPlanBadge = (plan?: StorePlanTier, locked?: boolean) => {
     if (!plan || plan === 'free') return null;
     const badge = planBadge[plan];
     return (
-      <span className={`ml-auto text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badge.color} flex items-center gap-0.5`}>
+      <span className={`ml-auto text-[9px] font-bold uppercase px-1.5 py-0.5 rounded ${badge.color} flex items-center gap-0.5 ${locked ? 'opacity-90' : ''}`}>
         <Lock size={8} />
         {badge.label}
       </span>
     );
+  };
+
+  const handleItemClick = (item: NavItem, child?: NavItem) => {
+    const target = child ?? item;
+    const requiredPlan = target.plan;
+    if (requiredPlan && !hasAccess(requiredPlan)) {
+      onUpgrade?.();
+      return;
+    }
+    if (child) {
+      onTabChange(child.id);
+    } else if (item.children && item.children.length > 0) {
+      toggleGroup(item.id);
+      const firstAccessible = item.children.find(c => !c.plan || hasAccess(c.plan));
+      if (firstAccessible && !isChildActive(item)) {
+        onTabChange(firstAccessible.id);
+      }
+    } else {
+      onTabChange(item.id);
+    }
   };
 
   const renderNavItem = (item: NavItem) => {
@@ -175,29 +197,23 @@ export function StoreSidebar({ activeTab, onTabChange, storeName }: StoreSidebar
     const hasChildren = item.children && item.children.length > 0;
     const isExpanded = expandedGroups.has(item.id);
     const isActive = activeTab === item.id || isChildActive(item);
+    const itemLocked = item.plan && !hasAccess(item.plan);
 
     return (
       <div key={item.id}>
         <button
-          onClick={() => {
-            if (hasChildren) {
-              toggleGroup(item.id);
-              if (!isChildActive(item)) {
-                onTabChange(item.children![0].id);
-              }
-            } else {
-              onTabChange(item.id);
-            }
-          }}
+          onClick={() => handleItemClick(item)}
           className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg text-sm transition-all duration-150 ${
-            isActive
+            isActive && !itemLocked
               ? 'bg-primary/15 text-primary font-semibold'
-              : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+              : itemLocked
+                ? 'text-muted-foreground hover:bg-amber-500/10 hover:text-amber-600 cursor-pointer'
+                : 'text-muted-foreground hover:bg-muted hover:text-foreground'
           }`}
         >
           {Icon && <Icon size={17} />}
           <span className="truncate">{item.label}</span>
-          {renderPlanBadge(item.plan)}
+          {renderPlanBadge(item.plan, itemLocked)}
           {hasChildren && (
             <span className={`${item.plan ? '' : 'ml-auto'} text-muted-foreground`}>
               {isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}
@@ -210,18 +226,21 @@ export function StoreSidebar({ activeTab, onTabChange, storeName }: StoreSidebar
           <div className="ml-6 mt-0.5 space-y-0.5 border-l border-border pl-2">
             {item.children!.map(child => {
               const isSubActive = activeTab === child.id;
+              const childLocked = child.plan && !hasAccess(child.plan);
               return (
                 <button
                   key={child.id}
-                  onClick={() => onTabChange(child.id)}
+                  onClick={() => handleItemClick(item, child)}
                   className={`w-full flex items-center gap-2 px-2.5 py-1.5 rounded-md text-xs transition-all ${
-                    isSubActive
+                    isSubActive && !childLocked
                       ? 'bg-primary/10 text-primary font-medium'
-                      : 'text-muted-foreground hover:bg-muted hover:text-foreground'
+                      : childLocked
+                        ? 'text-muted-foreground hover:bg-amber-500/10 hover:text-amber-600 cursor-pointer'
+                        : 'text-muted-foreground hover:bg-muted hover:text-foreground'
                   }`}
                 >
                   <span className="truncate">{child.label}</span>
-                  {renderPlanBadge(child.plan)}
+                  {renderPlanBadge(child.plan, childLocked)}
                 </button>
               );
             })}

@@ -3,6 +3,7 @@ import { StoreSidebar, StoreTab } from './StoreSidebar';
 import { TabSkeleton } from './TabSkeleton';
 import { UpgradeModal } from './UpgradeModal';
 import { SubscriptionPaymentFlow } from './SubscriptionPaymentFlow';
+import { useSubscription } from '@/hooks/useSubscription';
 import { Menu, X, Bell, ArrowLeft, Zap } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
@@ -38,6 +39,7 @@ interface StoreDashboardProps {
 
 export function StoreDashboard({ store, onStoreUpdate, onBack }: StoreDashboardProps) {
   const navigate = useNavigate();
+  const { subscription } = useSubscription();
   const [activeTab, setActiveTab] = useState<StoreTab>('dashboard');
   const [sidebarOpen, setSidebarOpen] = useState(true);
   const [upgradeOpen, setUpgradeOpen] = useState(false);
@@ -183,6 +185,8 @@ export function StoreDashboard({ store, onStoreUpdate, onBack }: StoreDashboardP
             activeTab={activeTab} 
             onTabChange={handleTabChange}
             storeName={store.name}
+            currentPlanId={subscription.planId}
+            onUpgrade={() => setUpgradeOpen(true)}
           />
         </div>
 
@@ -206,7 +210,7 @@ export function StoreDashboard({ store, onStoreUpdate, onBack }: StoreDashboardP
       <UpgradeModal
         open={upgradeOpen}
         onClose={() => setUpgradeOpen(false)}
-        currentPlanId="free"
+        currentPlanId={subscription.planId}
         onSelectPlan={(planId, billing) => {
           setUpgradeOpen(false);
           setPaymentFlow({ open: true, planId, billing, mode: 'payment' });
