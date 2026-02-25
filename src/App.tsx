@@ -4,9 +4,9 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import { CloudAuthProvider } from "@/contexts/CloudAuthContext";
 import { SupabaseAuthProvider } from "@/contexts/SupabaseAuthContext";
 import { LanguageSwitcher } from "@/components/LanguageSwitcher";
-import { HomePage } from "./pages/HomePage";
 
-// Lazy load pages for faster initial load
+// Lazy load all pages for faster initial load
+const HomePage = lazy(() => import("./pages/HomePage").then(m => ({ default: m.HomePage })));
 const SellerDashboard = lazy(() => import("./pages/SellerDashboard").then(m => ({ default: m.SellerDashboard })));
 const BuyerDashboard = lazy(() => import("./pages/BuyerDashboard").then(m => ({ default: m.BuyerDashboard })));
 const AdminDashboard = lazy(() => import("./pages/AdminDashboard").then(m => ({ default: m.AdminDashboard })));

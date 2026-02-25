@@ -73,6 +73,18 @@ export default defineConfig(({ mode }) => {
         }
       })
     ].filter(Boolean),
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks: {
+            'vendor-react': ['react', 'react-dom', 'react-router-dom'],
+            'vendor-supabase': ['@supabase/supabase-js'],
+            'vendor-ui': ['lucide-react', 'clsx', 'tailwind-merge', 'class-variance-authority'],
+          },
+        },
+      },
+      chunkSizeWarningLimit: 600,
+    },
     resolve: {
       alias: {
         "@": path.resolve(__dirname, "./src"),
