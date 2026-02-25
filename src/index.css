@@ -57,12 +57,30 @@
   border-color: hsl(var(--border));
 }
 
+html {
+  /* Prevent font-size zoom on input focus (iOS) */
+  -webkit-text-size-adjust: 100%;
+}
+
 body {
   background-color: hsl(var(--background));
   color: hsl(var(--foreground));
   font-family: "Inter", system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  /* Safe area for notched devices */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* Touch-friendly tap targets on mobile */
+@media (pointer: coarse) and (max-width: 768px) {
+  nav button,
+  nav a,
+  .touch-target {
+    min-height: 44px;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
 }
 
 /* Custom Scrollbar Styling - Purple/Brown Theme */

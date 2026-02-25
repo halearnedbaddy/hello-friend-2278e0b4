@@ -24,7 +24,7 @@ export function LanguageSwitcher() {
         <button
           type="button"
           onClick={() => setIsOpen(!isOpen)}
-          className="flex items-center gap-2 px-3 py-2 rounded-lg bg-white/95 backdrop-blur-sm border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition text-sm font-medium text-gray-700"
+          className="flex items-center gap-2 px-3 py-2.5 min-h-[44px] rounded-lg bg-white/95 backdrop-blur-sm border border-gray-200 shadow-sm hover:bg-gray-50 hover:border-gray-300 transition text-sm font-medium text-gray-700 touch-target"
           aria-label="Change language"
           aria-expanded={isOpen}
         >

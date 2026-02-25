@@ -24,12 +24,7 @@ const OrderTrackingPage = lazy(() => import("./pages/OrderTrackingPage").then(m 
 const PaymentSuccessPage = lazy(() => import("./pages/PaymentSuccessPage").then(m => ({ default: m.PaymentSuccessPage })));
 const PaymentCallbackPage = lazy(() => import("./pages/PaymentCallbackPage").then(m => ({ default: m.PaymentCallbackPage })));
 
-// Loading fallback
-const PageLoader = () => (
-  <div className="min-h-screen flex items-center justify-center bg-background">
-    <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-  </div>
-);
+import { PageSkeleton } from "@/components/skeletons";
 
 function App() {
   return (
@@ -39,7 +34,7 @@ function App() {
           <BrowserRouter>
             {/* Global language button — visible on all pages; z-40 so modals (z-50) cover it */}
             <LanguageSwitcher />
-            <Suspense fallback={<PageLoader />}>
+            <Suspense fallback={<PageSkeleton />}>
               <Routes>
                 <Route path="/" element={<HomePage />} />
                 <Route path="/seller" element={<SellerDashboard />} />

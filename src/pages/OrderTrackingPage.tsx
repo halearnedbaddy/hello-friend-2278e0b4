@@ -185,10 +185,19 @@ export function OrderTrackingPage() {
 
   if (loading) {
     return (
-      <div className="flex justify-center items-center min-h-screen bg-background">
-        <div className="text-center">
-          <Loader2 className="w-10 h-10 animate-spin text-primary mx-auto mb-4" />
-          <p className="text-muted-foreground">Loading order...</p>
+      <div className="min-h-screen bg-background p-4 md:p-6 animate-pulse">
+        <div className="max-w-2xl mx-auto space-y-6">
+          <div className="h-8 w-48 bg-muted rounded" />
+          <div className="bg-card rounded-xl border border-border p-6 space-y-4">
+            <div className="h-6 w-full bg-muted rounded" />
+            <div className="h-4 w-3/4 bg-muted rounded" />
+            <div className="h-32 bg-muted rounded-lg mt-4" />
+          </div>
+          <div className="space-y-3">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="h-16 bg-muted rounded-lg" />
+            ))}
+          </div>
         </div>
       </div>
     );

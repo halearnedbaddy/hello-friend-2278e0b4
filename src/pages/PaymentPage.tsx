@@ -287,8 +287,16 @@ const PaymentPage = () => {
 
   if (loading) {
     return (
-      <div className="flex min-h-screen items-center justify-center bg-background">
-        <Loader2 className="h-8 w-8 animate-spin text-primary" />
+      <div className="min-h-screen bg-background flex items-center justify-center p-4 animate-pulse">
+        <div className="w-full max-w-md space-y-6">
+          <div className="h-8 w-48 bg-muted rounded mx-auto" />
+          <div className="h-48 bg-muted rounded-xl" />
+          <div className="space-y-3">
+            <div className="h-4 w-full bg-muted rounded" />
+            <div className="h-4 w-3/4 bg-muted rounded" />
+            <div className="h-12 w-full bg-muted rounded-lg" />
+          </div>
+        </div>
       </div>
     );
   }

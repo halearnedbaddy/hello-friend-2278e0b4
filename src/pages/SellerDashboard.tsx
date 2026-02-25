@@ -460,8 +460,18 @@ export function SellerDashboard() {
   const renderStore = () => {
     if (storeLoading) {
       return (
-        <div className="flex items-center justify-center py-12">
-          <div className="text-muted-foreground">Loading store settings...</div>
+        <div className="animate-pulse space-y-6">
+          <div className="h-8 w-48 bg-muted rounded" />
+          <div className="bg-card rounded-xl border border-border p-6">
+            <div className="flex items-center gap-4 mb-4">
+              <div className="h-16 w-16 bg-muted rounded-xl" />
+              <div className="space-y-2 flex-1">
+                <div className="h-6 w-40 bg-muted rounded" />
+                <div className="h-4 w-24 bg-muted rounded" />
+              </div>
+            </div>
+            <div className="h-12 w-full bg-muted rounded-xl" />
+          </div>
         </div>
       );
     }
@@ -648,7 +658,8 @@ export function SellerDashboard() {
           <div className="flex items-center gap-4">
             <button 
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden p-2 text-gray-500 hover:bg-gray-100 rounded-null-lg transition"
+              className="lg:hidden p-3 min-h-[44px] min-w-[44px] text-gray-500 hover:bg-gray-100 rounded-null-lg transition touch-target"
+              aria-label="Open menu"
             >
               <MenuIcon size={24} />
             </button>
